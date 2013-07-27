@@ -21,5 +21,5 @@ Use the `tables.sql` to set up the MySQL database
 
 ## The client
 
-1. Put the fils from the `client` folder on your server
+1. Put the files from the `client` folder on your server
 2. Change the server, password, username, and database settings in the `gas.php` and `electricity.php` files
