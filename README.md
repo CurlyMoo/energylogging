@@ -6,8 +6,6 @@ RaspberryPi-P1-port
 <a href="http://flattr.com/thing/1106962/" target="_blank">
 <img src="http://api.flattr.com/button/flattr-badge-large.png" alt="Flattr this" title="Flattr this" border="0" /></a>
 
-Reading the P1 port with a Raspberry Pi
-
 ## Raspberry Pi Reader
 
 1. Download the https://github.com/CurlyMoo/MinimalPi files and read the README.md
