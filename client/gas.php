@@ -27,37 +27,45 @@ $aGas = Array();
 while($aDayGas = mysql_fetch_assoc($rDayGas)) {
 	$aGas[] = $aDayGas;
 	if(count($aGas) > 1) {
+		$iDay = 0;
+		$bDaySet = false;
 		$iHour = $aGas[count($aGas)-2]['hour'];
 		if($iHour == 23) {
-			$iHour = 0;
-			$y=0;
+			if($aDayGas['hour'] != 1) {
+				$iHour = 0;
+				$y=0;
+			}
 		} else {
 			$y=1;
 		}
-		$missingHours=(($aDayGas['hour']-$iHour));
-		
-		if($iHour == 22 && $aDayGas['hour'] != 23) {
-			$x = count($aGas)-1;
-			$aOldGas = $aGas[$x];
-			$aGas[$x]['hour'] = 23;
-			$aGas[$x]['datetime'] = strtotime(date("d-m-Y", $aGas[$x-1]['datetime']).(($aGas[$x]['hour'] < 10) ? "0".$aGas[$x]['hour'] : $aGas[$x]['hour']).".00.00");
-			$aGas[$x]['m3'] = 0;
-			$aGas[$x+1]=Array();
-			$aGas[$x+1]=$aOldGas;	
-			$y=0;
-			if($aOldGas['hour'] != 0) {
-				$missingHours=2;
-				$iHour = -1;
-				$y=1;
+		if($aDayGas['hour'] == 0) {
+			$aDayGas['hour'] = 24;
+			$iDay = 86400;
+			$bDaySet = true;
+		} else if($aDayGas['hour'] == 1) {
+			if($iHour != 0) {
+				$iHour = $iHour-24;
 			}
+			$y=1;
 		}
-
+		$missingHours = (($aDayGas['hour']-$iHour));
+		
 		if($missingHours > 1) {
 			for($i=0;$i<($missingHours-$y);$i++) {
 				$x = count($aGas)-1;
 				$aOldGas = $aGas[$x];
-				$aGas[$x]['hour'] = $iHour+($i+$y);
-				$aGas[$x]['datetime'] = strtotime(date("d-m-Y", $aGas[$x]['datetime']).(($aGas[$x]['hour'] < 10) ? "0".$aGas[$x]['hour'] : $aGas[$x]['hour']).".00.00");
+				if($iHour+($i+$y) < 0) {
+					$aGas[$x]['hour'] = 24+($iHour+($i+$y));
+				} else {					
+					$aGas[$x]['hour'] = $iHour+($i+$y);
+				}
+				if(!$bDaySet) {
+					if($aGas[$x]['hour'] == 23 )
+						$iDay = 86400;
+					else
+						$iDay = 0;
+				}
+				$aGas[$x]['datetime'] = strtotime(date("d-m-Y ", ($aGas[$x]['datetime'])-$iDay).(($aGas[$x]['hour'] < 10) ? "0".$aGas[$x]['hour'] : $aGas[$x]['hour']).".00.00");
 				$aGas[$x]['m3'] = 0;
 				$aGas[$x+1]=Array();
 				$aGas[$x+1]=$aOldGas;
