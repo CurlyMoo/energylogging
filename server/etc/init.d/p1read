@@ -1,0 +1,38 @@
+#!/bin/sh
+
+PATH=/bin:/usr/bin:/sbin:/usr/sbin
+DESC="P1 read daemon"
+NAME=p1read
+DAEMON=/p1read.py
+SCRIPTNAME=/etc/init.d/p1read
+
+test -f $DAEMON || exit 0
+
+. /lib/lsb/init-functions
+
+case "$1" in
+start)
+	log_daemon_msg "Starting p1 reader"
+	/p1read.py
+        log_end_msg $?
+	;;
+stop)
+	log_daemon_msg "Stopping p1 reader"
+	pkill p1read
+        RETVAL=$?
+        [ $RETVAL -eq 0 ] && [ -e "$PIDFILE" ] && rm -f $PIDFILE
+        log_end_msg $RETVAL
+        ;;
+restart)
+	log_daemon_msg "Restarting p1 reader"
+        $0 stop
+        $0 start
+        ;;
+status)
+        status_of_proc -p $PIDFILE $DAEMON $NAME && exit 0 || exit $?
+        ;;
+*)	log_action_msg "Usage: /etc/init.d/cron {start|stop|status|restart|reload|force-reload}"
+        exit 2
+        ;;
+esac
+exit 0
