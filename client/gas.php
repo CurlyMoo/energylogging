@@ -59,11 +59,16 @@ while($aDayGas = mysql_fetch_assoc($rDayGas)) {
 				} else {					
 					$aGas[$x]['hour'] = $iHour+($i+$y);
 				}
+
 				if(!$bDaySet) {
-					if($aGas[$x]['hour'] == 23 )
+					if((date("d", $aGas[$x]['datetime']) != date("d", $aGas[$x-1]['datetime']) && $aGas[$x]['hour'] <= 23)) {
 						$iDay = 86400;
-					else
+					} else {
 						$iDay = 0;
+					}
+				}
+				if($aGas[$x]['hour'] == 0) {
+					$iDay = 0;
 				}
 				$aGas[$x]['datetime'] = strtotime(date("d-m-Y ", ($aGas[$x]['datetime'])-$iDay).(($aGas[$x]['hour'] < 10) ? "0".$aGas[$x]['hour'] : $aGas[$x]['hour']).".00.00");
 				$aGas[$x]['m3'] = 0;
