@@ -31,48 +31,43 @@ INSERT INTO rate_types VALUES (DEFAULT, "low");
 INSERT INTO rate_types VALUES (DEFAULT, "high");
 
 CREATE VIEW electricity AS
-SELECT 
-	STRFTIME("%H", `datetime`) AS hour,
-	(STRFTIME("%s",CAST(`datetime` AS date) || ' ' || `datetime`) + (2 * 3600)) AS `datetime`,
-	round(((max(`usage`)-min(`usage`)) * 1000),0) AS `watt`,
+SELECT
+	HOUR(`datetime`) AS `hour`,
+	(unix_timestamp(concat(cast(`datetime` as date),' ',sec_to_time(((time_to_sec(`datetime`) DIV 900) * 900)))) + (2 * 3600)) AS `datetime`,round(((max(`consumption`.`usage`) - min(`consumption`.`usage`)) * 1000),0) AS `usage`,
 	max(`usage`) AS `max`,
 	min(`usage`) AS `min`,
-	rate_id AS rate 
-FROM 
-	consumption 
-WHERE 
-	((rate_id = 2) OR (rate_id = 3)) 
+	`rate_id` AS `rate` 
+FROM
+	`consumption` 
+WHERE
+	((`rate_id` = 2) OR (`rate_id` = 3)) 
 GROUP BY
-	rate_id,
+	`rate_id`,
 	DATE(`datetime`),
-	STRFTIME("%H", `datetime`),
-	CAST((STRFTIME("%m", `datetime`) / 15) AS INTEGER) 
+	HOUR(`datetime`),
+	FLOOR((MINUTE(`datetime`) / 15)) 
 HAVING
-	((watt > 0) and (watt < 1000)) 
+	((`usage` > 0) and (`usage` < 1000)) 
 ORDER BY
 	DATE(`datetime`),
-	STRFTIME("%H", `datetime`),
-	CAST((STRFTIME("%m", `datetime`) / 15) AS INTEGER);
+	HOUR(`datetime`),
+	FLOOR((minute(`datetime`) / 15));
 	
 CREATE VIEW gas AS 
 SELECT 
-	HOUR((`datetime` + interval 1 hour)) AS `hour`,
-	(unix_timestamp(
-		(date_format(`datetime`, '%Y-%m-%d %H:00:00') 
-		+ interval if((minute(`datetime`) < 30), 0, 1) hour)) + 
-		(1 * 3600)) AS `datetime`, round((max(`usage`) - 
-		min(`usage`)), 0) AS `watt`,
-	max(`usage`) AS `max`,
-	min(`usage`) AS `min`,
-	rate_id AS `rate` 
-FROM 
-	consumption
-WHERE
-	rate_id = 1
+	HOUR((`datetime` + INTERVAL 1 HOUR)) AS `hour`,
+	(unix_timestamp((DATE_FORMAT(`datetime`, '%Y-%m-%d %H:00:00') + INTERVAL IF((MINUTE(`datetime`) < 30), 0, 1) HOUR)) + (1 * 3600)) AS `datetime`, ROUND((MAX(`usage`) - MIN(`usage`)), 0) AS `usage`,
+	MAX(`usage`) AS `max`, 
+	MIN(`usage`) AS `min`,
+	`rate_id` AS `rate` 
+FROM
+	`consumption` 
+WHERE 
+	(`rate_id` = 1) 
 GROUP BY
-	rate_id,
+	`rate_id`,
 	DATE(`datetime`),
 	HOUR(`datetime`) 
-ORDER BY
+ORDER BY 
 	DATE(`datetime`),
 	HOUR(`datetime`);
