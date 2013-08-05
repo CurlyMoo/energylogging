@@ -49,7 +49,9 @@ while($aDayGas = mysql_fetch_assoc($rDayGas)) {
 			$y=1;
 		}
 		$missingHours = (($aDayGas['hour']-$iHour));
-		
+		if($missingHours == 24) {
+			$missingHours = 0;
+		}
 		if($missingHours > 1) {
 			for($i=0;$i<($missingHours-$y);$i++) {
 				$x = count($aGas)-1;
