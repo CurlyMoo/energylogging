@@ -4,22 +4,7 @@ $rConnect = mysql_connect('x.x.x.x', '*username*', '*password*');
 $rDatabase = mysql_select_db('*database*');
 
 
-$rDayGas = mysql_query("
-SELECT
-	`datetime`,
-	`hour`,
-	ROUND((`min`-IFNULL((SELECT 
-							`max` 
-						FROM 
-							gas 
-						WHERE 
-							datetime < t1.datetime 
-						ORDER BY 
-							datetime 
-						DESC 
-						LIMIT 1), `min`))*1000)/1000 AS m3
-FROM 
-	gas t1") or die(mysql_error());
+$rDayGas = mysql_query("SELECT * FROM gas") or die(mysql_error());
 		
 /* Make sure all missing hours are shows with zero's */
 $iNrRows = mysql_num_rows($rDayGas);
