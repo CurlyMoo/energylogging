@@ -45,7 +45,73 @@ CREATE TABLE IF NOT EXISTS `electricity` (
   `watt` double(17,0) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
-CREATE VIEW gas AS 
+CREATE TABLE IF NOT EXISTS `gas_buffer` (
+  `hour` int(2) DEFAULT NULL,
+  `datetime` int(11) DEFAULT NULL,
+  `usage` double(17,0) DEFAULT NULL,
+  `max` float(10,3) unsigned,
+  `min` float(10,3) unsigned,
+  `rate` tinyint(1) unsigned NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+	
+CREATE TABLE IF NOT EXISTS `gas` (
+  `datetime` int(11) DEFAULT NULL,
+  `hour` int(2) DEFAULT NULL,
+  `m3` double(21,4) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+INSERT INTO electricity_buffer (`hour`, `datetime`, `usage`, `max`, `min`, `rate`) 
+SELECT
+	HOUR(`datetime`) AS `hour`,
+	(unix_timestamp(concat(cast(`datetime` as date),' ',sec_to_time(((time_to_sec(`datetime`) DIV 900) * 900)))) + (2 * 3600)) AS `datetime`,
+	round(((max(`consumption`.`usage`) - min(`consumption`.`usage`)) * 1000),0) AS `usage`,
+	max(`usage`) AS `max`,
+	min(`usage`) AS `min`,
+	`rate_id` AS `rate` 
+FROM
+	`consumption` 
+WHERE
+	((`rate_id` = 2) OR (`rate_id` = 3))
+GROUP BY
+	`rate_id`,
+	DATE(`datetime`),
+	HOUR(`datetime`),
+	FLOOR((MINUTE(`datetime`) / 15)) 
+HAVING
+	((`usage` > 0) and (`usage` < 1000))
+AND
+	(`datetime` > (SELECT max(`datetime`) FROM electricity_buffer) OR (SELECT count(*) FROM electricity_buffer) = 0)
+ORDER BY
+	DATE(`datetime`),
+	HOUR(`datetime`),
+	FLOOR((minute(`datetime`) / 15));
+
+INSERT INTO electricity (`hour`, `datetime`, `watt`)
+SELECT
+	`hour`,
+	`datetime`,
+	ROUND(
+		((`max`-`min`)+
+		(`min`-IFNULL((SELECT 
+							`max`
+						FROM 
+							electricity_buffer
+						WHERE 
+							`datetime` < t1.`datetime`
+						AND
+							rate = t1.rate
+                       	AND
+                       		MINUTE(FROM_UNIXTIME(t1.`datetime`)) > 0
+						ORDER BY 
+							datetime
+						DESC 
+						LIMIT 1), `min`)))*1000) AS watt
+FROM 
+	electricity_buffer t1
+HAVING
+	(`datetime` > (SELECT max(`datetime`) FROM electricity) OR (SELECT count(*) FROM electricity) = 0);
+	
+INSERT INTO gas_buffer (`hour`, `datetime`, `usage`, `max`, `min`, `rate`)
 SELECT 
 	HOUR((`datetime` + INTERVAL 1 HOUR)) AS `hour`,
 	(unix_timestamp((DATE_FORMAT(`datetime`, '%Y-%m-%d %H:00:00') + INTERVAL IF((MINUTE(`datetime`) < 30), 0, 1) HOUR)) + (1 * 3600)) AS `datetime`, ROUND((MAX(`usage`) - MIN(`usage`)), 0) AS `usage`,
@@ -59,7 +125,28 @@ WHERE
 GROUP BY
 	`rate_id`,
 	DATE(`datetime`),
-	HOUR(`datetime`) 
+	HOUR(`datetime`)
+HAVING
+	(`datetime` > (SELECT max(`datetime`) FROM gas_buffer) OR (SELECT count(*) FROM gas_buffer) = 0)
 ORDER BY 
 	DATE(`datetime`),
 	HOUR(`datetime`);
+	
+INSERT INTO gas (`hour`, `datetime`, `m3`)
+SELECT
+	`hour`,
+	`datetime`,
+	ROUND((`min`-IFNULL((SELECT 
+							`max` 
+						FROM 
+							gas_buffer
+						WHERE 
+							datetime < t1.datetime 
+						ORDER BY 
+							datetime 
+						DESC 
+						LIMIT 1), `min`))*1000)/1000 AS m3
+FROM 
+	gas_buffer t1
+HAVING
+	(`datetime` > (SELECT max(`datetime`) FROM gas) OR (SELECT count(*) FROM gas) = 0);
