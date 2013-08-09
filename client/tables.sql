@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS device_types (
+TABLE IF NOT EXISTS device_types (
 	type_id tinyint(1) unsigned UNIQUE AUTO_INCREMENT,
 	name varchar(11) NOT NULL UNIQUE
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=1;
@@ -21,7 +21,7 @@ CREATE TABLE IF NOT EXISTS consumption (
 	`usage` float(10,3) unsigned NOT NULL,
 	`datetime` timestamp NOT NULL,
 	direction tinyint(1) unsigned
-)  ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=1;
 
 INSERT INTO device_types VALUES (DEFAULT, "electricity");
 INSERT INTO device_types VALUES (DEFAULT, "gas");
@@ -30,29 +30,21 @@ INSERT INTO rate_types VALUES (DEFAULT, "both");
 INSERT INTO rate_types VALUES (DEFAULT, "low");
 INSERT INTO rate_types VALUES (DEFAULT, "high");
 
-CREATE VIEW electricity AS
-SELECT
-	HOUR(`datetime`) AS `hour`,
-	(unix_timestamp(concat(cast(`datetime` as date),' ',sec_to_time(((time_to_sec(`datetime`) DIV 900) * 900)))) + (2 * 3600)) AS `datetime`,round(((max(`consumption`.`usage`) - min(`consumption`.`usage`)) * 1000),0) AS `usage`,
-	max(`usage`) AS `max`,
-	min(`usage`) AS `min`,
-	`rate_id` AS `rate` 
-FROM
-	`consumption` 
-WHERE
-	((`rate_id` = 2) OR (`rate_id` = 3)) 
-GROUP BY
-	`rate_id`,
-	DATE(`datetime`),
-	HOUR(`datetime`),
-	FLOOR((MINUTE(`datetime`) / 15)) 
-HAVING
-	((`usage` > 0) and (`usage` < 1000)) 
-ORDER BY
-	DATE(`datetime`),
-	HOUR(`datetime`),
-	FLOOR((minute(`datetime`) / 15));
-	
+CREATE TABLE IF NOT EXISTS `electricity_buffer` (
+  `hour` int(2) NOT NULL,
+  `datetime` int(11) NOT NULL,
+  `usage` double(17,0) NOT NULL,
+  `max` float(10,3) unsigned NOT NULL,
+  `min` float(10,3) unsigned NOT NULL,
+  `rate` tinyint(1) unsigned NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+CREATE TABLE IF NOT EXISTS `electricity` (
+  `hour` int(2) DEFAULT NULL,
+  `datetime` int(11) DEFAULT NULL,
+  `watt` double(17,0) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
 CREATE VIEW gas AS 
 SELECT 
 	HOUR((`datetime` + INTERVAL 1 HOUR)) AS `hour`,
