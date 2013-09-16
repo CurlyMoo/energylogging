@@ -91,21 +91,24 @@ ORDER BY
 	FLOOR((minute(`datetime`) / 15));
 
 INSERT INTO electricity (`hour`, `datetime`, `watt`, `prev_max`, `prev_hour`) 
-SELECT 
-	`hour`, 
-	`datetime`, 
-	if(@lastHour = `hour`, 
+SELECT
+	`hour`,
+	`datetime`,
+	if(@lastHour = `hour`,
 		ROUND(((`max` - `min`) + (`min` - @lastMax))*1000),
 		ROUND(((`max` - `min`))*1000)
 	) AS watt,
 	@lastHour := `hour` AS prev_hour,
-	@lastMax := `max` AS prev_max
-FROM 
+	(SELECT @lastMax := `max` FROM electricity_buffer t2 WHERE t2.rate = t1.rate AND t2.datetime = t1.datetime) AS prev_max
+FROM
 	electricity_buffer t1,
 	(SELECT @lastMax := 0, @lastHour := 0) SQLVars
+GROUP BY
+	`datetime`,
+	`hour`
 HAVING
 	(`datetime` > (SELECT max(`datetime`) FROM electricity) OR (SELECT count(*) FROM electricity) = 0);
-	
+
 INSERT INTO gas_buffer (`hour`, `datetime`, `usage`, `max`, `min`, `rate`)
 SELECT 
 	HOUR((`datetime` + INTERVAL 1 HOUR)) AS `hour`,
