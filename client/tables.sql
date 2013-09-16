@@ -90,7 +90,7 @@ ORDER BY
 	HOUR(`datetime`),
 	FLOOR((minute(`datetime`) / 15));
 
-INSERT INTO electricity (`hour`, `datetime`, `watt`, `prev_max`, `prev_hour`) 
+INSERT INTO electricity (`hour`, `datetime`, `watt`, `prev_hour`, `prev_max`) 
 SELECT
 	`hour`,
 	`datetime`,
@@ -130,7 +130,7 @@ ORDER BY
 	DATE(`datetime`),
 	HOUR(`datetime`);
 	
-INSERT INTO gas (`hour`, `datetime`, `m3`, `prev_max`, `prev_hour`) 
+INSERT INTO gas (`hour`, `datetime`, `m3`, `prev_hour`, `prev_max`) 
 SELECT
 	`hour`,
 	`datetime`,
