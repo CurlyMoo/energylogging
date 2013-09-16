@@ -140,3 +140,5 @@ SELECT
 FROM 
 	gas_buffer t1,
 	(SELECT @lastMax := 0, @lastHour := 0) SQLVars
+HAVING
+	(`datetime` > (SELECT max(`datetime`) FROM gas) OR (SELECT count(*) FROM gas) = 0);
