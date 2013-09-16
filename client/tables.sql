@@ -42,7 +42,9 @@ CREATE TABLE IF NOT EXISTS `electricity_buffer` (
 CREATE TABLE IF NOT EXISTS `electricity` (
   `hour` int(2) DEFAULT NULL,
   `datetime` int(11) DEFAULT NULL,
-  `watt` double(17,0) DEFAULT NULL
+  `watt` double(17,0) DEFAULT NULL,
+  `prev_hour` int(2) DEFAULT NULL,
+  `prev_max` float(10,3) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 CREATE TABLE IF NOT EXISTS `gas_buffer` (
@@ -57,7 +59,9 @@ CREATE TABLE IF NOT EXISTS `gas_buffer` (
 CREATE TABLE IF NOT EXISTS `gas` (
   `datetime` int(11) DEFAULT NULL,
   `hour` int(2) DEFAULT NULL,
-  `m3` double(21,4) DEFAULT NULL
+  `m3` double(21,4) DEFAULT NULL,
+  `prev_hour` int(2) DEFAULT NULL,
+  `prev_max` float(10,3) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 INSERT INTO electricity_buffer (`hour`, `datetime`, `usage`, `max`, `min`, `rate`) 
@@ -86,28 +90,19 @@ ORDER BY
 	HOUR(`datetime`),
 	FLOOR((minute(`datetime`) / 15));
 
-INSERT INTO electricity (`hour`, `datetime`, `watt`)
-SELECT
-	`hour`,
-	`datetime`,
-	ROUND(
-		((`max`-`min`)+
-		(`min`-IFNULL((SELECT 
-							`max`
-						FROM 
-							electricity_buffer
-						WHERE 
-							`datetime` < t1.`datetime`
-						AND
-							rate = t1.rate
-                       	AND
-                       		MINUTE(FROM_UNIXTIME(t1.`datetime`)) > 0
-						ORDER BY 
-							datetime
-						DESC 
-						LIMIT 1), `min`)))*1000) AS watt
+INSERT INTO electricity (`hour`, `datetime`, `watt`, `prev_max`, `prev_hour`) 
+SELECT 
+	`hour`, 
+	`datetime`, 
+	if(@lastHour = `hour`, 
+		ROUND(((`max` - `min`) + (`min` - @lastMax))*1000),
+		ROUND(((`max` - `min`))*1000)
+	) AS watt,
+	@lastHour := `hour` AS prev_hour,
+	@lastMax := `max` AS prev_max
 FROM 
-	electricity_buffer t1
+	electricity_buffer t1,
+	(SELECT @lastMax := 0, @lastHour := 0) SQLVars
 HAVING
 	(`datetime` > (SELECT max(`datetime`) FROM electricity) OR (SELECT count(*) FROM electricity) = 0);
 	
@@ -132,21 +127,16 @@ ORDER BY
 	DATE(`datetime`),
 	HOUR(`datetime`);
 	
-INSERT INTO gas (`hour`, `datetime`, `m3`)
+INSERT INTO gas (`hour`, `datetime`, `m3`, `prev_max`, `prev_hour`) 
 SELECT
 	`hour`,
 	`datetime`,
-	ROUND((`min`-IFNULL((SELECT 
-							`max` 
-						FROM 
-							gas_buffer
-						WHERE 
-							datetime < t1.datetime 
-						ORDER BY 
-							datetime 
-						DESC 
-						LIMIT 1), `min`))*1000)/1000 AS m3
+	(ROUND((if(@lastMax = 0,
+		0,
+		`min`-@lastMax
+	)*1000))/1000) AS m3,
+	@lastHour := `hour` AS prev_hour,
+	if(`max` > 0, @lastMax := `max`, @lastMax = @lastMax) AS prev_max
 FROM 
-	gas_buffer t1
-HAVING
-	(`datetime` > (SELECT max(`datetime`) FROM gas) OR (SELECT count(*) FROM gas) = 0);
+	gas_buffer t1,
+	(SELECT @lastMax := 0, @lastHour := 0) SQLVars
