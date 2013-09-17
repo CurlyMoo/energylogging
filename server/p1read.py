@@ -76,6 +76,7 @@ if(DAEMONIZE == 1):
 now = datetime.datetime.now();
 
 while(now.year == 1970):
+	now = datetime.datetime.now();	
         time.sleep(1)
 
 while(1):
