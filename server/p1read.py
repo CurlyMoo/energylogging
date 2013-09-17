@@ -72,7 +72,9 @@ if(DAEMONIZE == 1):
 			exit(0)
 	except OSError, e:
 		exit(1)
-		
+
+now = datetime.datetime.now();
+
 while(now.year == 1970):
         time.sleep(1)
 
