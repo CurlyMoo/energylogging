@@ -95,13 +95,13 @@ while(1):
                         if(re.match("[0-9]-[0-9]:96.1.1.*",line)):
                                 newElecticitySerial = str(re.search("[0-9]-[0-9]:96.1.1\((.*)\)",line).group(1))
                         if(re.match("[0-9]-[0-9]:1.8.1.*",line)):
-                                newElecticityRateUsedPeak = float("{0:.2f}".format(float(re.search("[0-9]-[0-9]:1.8.1\([0]{1,}(.*)\*kWh\)",line).group(1))))
+                                newElecticityRateUsedOffPeak = float("{0:.2f}".format(float(re.search("[0-9]-[0-9]:1.8.1\([0]{1,}(.*)\*kWh\)",line).group(1))))
                         if(re.match("[0-9]-[0-9]:1.8.2.*",line)):
-                                newElecticityRateUsedOffPeak = float("{0:.2f}".format(float(re.search("[0-9]-[0-9]:1.8.2\([0]{1,}(.*)\*kWh\)",line).group(1))))
+                                newElecticityRateUsedPeak = float("{0:.2f}".format(float(re.search("[0-9]-[0-9]:1.8.2\([0]{1,}(.*)\*kWh\)",line).group(1))))
                         if(re.match("[0-9]-[0-9]:2.8.1.*",line)):
-                                newElecticityRateGeneratedPeak = float("{0:.2f}".format(float(re.search("[0-9]-[0-9]:2.8.1\([0]{1,}(.*)\*kWh\)",line).group(1))))
+                                newElecticityRateGeneratedOffPeak = float("{0:.2f}".format(float(re.search("[0-9]-[0-9]:2.8.1\([0]{1,}(.*)\*kWh\)",line).group(1))))
                         if(re.match("[0-9]-[0-9]:2.8.2.*",line)):
-                                newElecticityRateGeneratedOffPeak = float("{0:.2f}".format(float(re.search("[0-9]-[0-9]:2.8.2\([0]{1,}(.*)\*kWh\)",line).group(1))))
+                                newElecticityRateGeneratedPeak = float("{0:.2f}".format(float(re.search("[0-9]-[0-9]:2.8.2\([0]{1,}(.*)\*kWh\)",line).group(1))))
                         if(re.match("[0-9]-[0-9]:96.14.0.*",line)):
                                 newElecticityCurrentRate = re.search("[0-9]-[0-9]:96.14.0\([0]{1,}(.*)\)",line).group(1)
                         if(re.match("[0-9]-[0-9]:1.7.0.*",line)):
