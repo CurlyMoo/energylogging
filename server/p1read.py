@@ -145,7 +145,7 @@ while(1):
 						file.write("INSERT INTO consumption (dev_id, rate_id, `usage`, `datetime`, direction) VALUES ((SELECT dev_id FROM devices WHERE name = '%s'), (SELECT rate_id FROM rate_types WHERE name = 'low'), %.2f, '%s', 1);\n" % (newElecticitySerial, newElecticityRateGeneratedOffPeak, str(time.strftime('%Y-%m-%d %H:%M:%S'))))
 					if(newElecticityRateGeneratedPeak != oldElecticityRateGeneratedPeak):
 						oldElecticityRateGeneratedPeak = newElecticityRateGeneratedPeak
-						file.write("INSERT INTO consumption (dev_id, rate_id, `usage`, `datetime`, direction) VALUES ((SELECT dev_id FROM devices WHERE name = '%s'), (SELECT rate_id FROM rate_types WHERE name = 'high'), %.2f, '%s'), 1);\n" % (newElecticitySerial, newElecticityRateGeneratedPeak, str(time.strftime('%Y-%m-%d %H:%M:%S'))))
+						file.write("INSERT INTO consumption (dev_id, rate_id, `usage`, `datetime`, direction) VALUES ((SELECT dev_id FROM devices WHERE name = '%s'), (SELECT rate_id FROM rate_types WHERE name = 'high'), %.2f, '%s', 1);\n" % (newElecticitySerial, newElecticityRateGeneratedPeak, str(time.strftime('%Y-%m-%d %H:%M:%S'))))
 					if(newGasTotal != oldGasTotal):
 						oldGasTotal = newGasTotal
 						file.write("INSERT INTO consumption (dev_id, rate_id, `usage`, `datetime`, direction) VALUES ((SELECT dev_id FROM devices WHERE name = '%s'), (SELECT rate_id FROM rate_types WHERE name = 'both'), %.3f, '%s', 0);\n" % (newGasSerial, newGasTotal, str(time.strftime('%Y-%m-%d %H:%M:%S'))))
