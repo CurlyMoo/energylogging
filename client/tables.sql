@@ -1,11 +1,11 @@
-TABLE IF NOT EXISTS device_types (
+CREATE TABLE IF NOT EXISTS device_types (
 	type_id tinyint(1) unsigned UNIQUE AUTO_INCREMENT,
 	name varchar(11) NOT NULL UNIQUE
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=1;
 
 CREATE TABLE IF NOT EXISTS devices (
 	dev_id tinyint(1) unsigned UNIQUE AUTO_INCREMENT,
-	name char(34) NOT NULL,
+	name char(34) NOT NULL UNIQUE,
 	type_id tinyint(1) unsigned NOT NULL REFERENCES device_types (type_id) ON DELETE SET NULL ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=1;
 
