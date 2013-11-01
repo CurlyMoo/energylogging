@@ -12,9 +12,9 @@ while($aHourElec = mysql_fetch_assoc($rHourElec)) {
 
 	$aDate = new DateTime(date("Y-m-d H:i:s", $aHourElec['datetime']-(($aTS['ts']+1)*3600)), new DateTimeZone(date_default_timezone_get()));
 	if($aDate->format('I') == 0) {
-		$aHourElec['hour'] -= $aTS['ts'];
 		$aHourElec['datetime'] -= $aTS['ts']*3600;
 	}
+	
 	if($aHourElec['hour'] >= 23 || $aHourElec['hour'] < 7) {
 		$sJson .= '{"x": '.$aHourElec['datetime'].'000, "y": '.$aHourElec['watt'].', "color": "#2f7ed8"},';
 	} else {
