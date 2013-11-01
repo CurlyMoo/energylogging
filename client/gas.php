@@ -20,6 +20,13 @@ while($aDayGas = mysql_fetch_assoc($rDayGas)) {
 		$iMissingHours = $iDateCur-$iDatePrev;
 		$iHourNew = $iHourPrev;		
 		
+		$aDate = new DateTime(date("Y-m-d H:i:s", $aDayGas['datetime']-(2*3600)));
+                if($aDate->format('I') == 0) {
+                        $aDayGas['hour'] -= 1;
+                        $aDayGas['datetime'] -= 3600;
+                }
+		
+		
 		if($iMissingHours > 1) {
 			for($i=0;$i<$iMissingHours-1;$i++) {
 				if((++$iHourNew) >= 24) {
