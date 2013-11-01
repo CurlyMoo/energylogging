@@ -20,7 +20,6 @@ while($aHourElec = mysql_fetch_assoc($rHourElec)) {
 	} else {
 		$sJson .= '{"x": '.$aHourElec['datetime'].'000, "y": '.$aHourElec['watt'].', "color": "#ffc600"},';
 	}
-	$sJson .= '['.$aHourElec['datetime'].'000,'.$aHourElec['watt'].'],';
 }
 $sJson = substr($sJson, 0, -1);
 echo $sJson .= ']';
