@@ -8,6 +8,11 @@ $rHourElec = mysql_query("SELECT * FROM electricity");
 $iNrRows = mysql_num_rows($rHourElec);
 $sJson = '[';
 while($aHourElec = mysql_fetch_assoc($rHourElec)) {
+	$aDate = new DateTime(date("Y-m-d H:i:s", $aHourElec['datetime']-(2*3600)));
+	if($aDate->format('I') == 0) {
+                $aHourElec['hour'] -= 1;
+                $aHourElec['datetime'] -= 3600;
+        }
 	if($aHourElec['hour'] >= 23 || $aHourElec['hour'] < 7)
 		$sJson .= '{"x": '.$aHourElec['datetime'].'000, "y": '.$aHourElec['watt'].', "color": "#2f7ed8"},';
 	else
