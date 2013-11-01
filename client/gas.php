@@ -22,7 +22,7 @@ while($aDayGas = mysql_fetch_assoc($rDayGas)) {
 		$iMissingHours = $iDateCur-$iDatePrev;
 		$iHourNew = $iHourPrev;		
 
-		$aDate = new DateTime(date("Y-m-d H:i:s", $aHourElec['datetime']-(($aTS['ts']+1)*3600)), new DateTimeZone(date_default_timezone_get()));
+		$aDate = new DateTime(date("Y-m-d H:i:s", $aDayGas['datetime']-(($aTS['ts']+1)*3600)), new DateTimeZone(date_default_timezone_get()));
 		if($aDate->format('I') == 0) {
 			$aDayGas['hour'] -= $aTS['ts'];
 			$aDayGas['datetime'] -= $aTS['ts']*3600;
