@@ -5,8 +5,10 @@ $rDatabase = mysql_select_db('*database*');
 
 
 $rDayGas = mysql_query("SELECT * FROM gas") or die(mysql_error());
+$rTS = mysql_query("SELECT TIMEDIFF(NOW(), UTC_TIMESTAMP) as ts");
+$aTS = mysql_fetch_assoc($rTS);
+
 /* Make sure all missing hours are shows with zero's */
-$iNrRows = mysql_num_rows($rDayGas);
 $aPrevGas = Array();
 $sJson = '[';
 while($aDayGas = mysql_fetch_assoc($rDayGas)) {
@@ -19,14 +21,13 @@ while($aDayGas = mysql_fetch_assoc($rDayGas)) {
 		
 		$iMissingHours = $iDateCur-$iDatePrev;
 		$iHourNew = $iHourPrev;		
-		
-		$aDate = new DateTime(date("Y-m-d H:i:s", $aDayGas['datetime']-(2*3600)));
-                if($aDate->format('I') == 0) {
-                        $aDayGas['hour'] -= 1;
-                        $aDayGas['datetime'] -= 3600;
-                }
-		
-		
+
+		$aDate = new DateTime(date("Y-m-d H:i:s", $aHourElec['datetime']-(($aTS['ts']+1)*3600)), new DateTimeZone(date_default_timezone_get()));
+		if($aDate->format('I') == 0) {
+			$aDayGas['hour'] -= $aTS['ts'];
+			$aDayGas['datetime'] -= $aTS['ts']*3600;
+		}
+
 		if($iMissingHours > 1) {
 			for($i=0;$i<$iMissingHours-1;$i++) {
 				if((++$iHourNew) >= 24) {
@@ -37,6 +38,7 @@ while($aDayGas = mysql_fetch_assoc($rDayGas)) {
 				$sJson .= '['.(($iDatePrev*3600)+($iDay*3600)+(($iHourNew-$iHourPrev)*3600)).'000,0],';
 			}
 		}
+
 		$sJson .= '['.$aDayGas['datetime'].'000,'.$aDayGas['m3'].'],';		
 	}
 	$aPrevGas = $aDayGas;
