@@ -12,6 +12,7 @@
 2. Write the image to your SD card with e.g. https://sourceforge.net/projects/win32diskimager/
 3. Change the settings in the cmdline.txt
 4. Put the SD card in your Raspberry Pi and boot
+5. (Your adviced to connect a ext3/4 formatted USB drive for caching)
 
 ## Connecting the P1 to the Raspberry Pi
 Use the following scheme to connect the P1 port to the Raspberry Pi (other methods will work as well, but this is how i did it)<br /><br />
