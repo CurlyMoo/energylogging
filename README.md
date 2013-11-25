@@ -6,14 +6,12 @@
 <img src="http://api.flattr.com/button/flattr-badge-large.png" alt="Flattr this" title="Flattr this" border="0" /></a>
 <hr>
 
-## Raspberry Pi Reader
+## Raspberry Pi P1 Reader
 
-1. Download the https://github.com/CurlyMoo/MinimalPi files and read the README.md
-2. Add the files from the `server` folder in the appropriate folder
-3. Change the server, password, username, and database settings in the mysql.py file
-4. Format an USB key as ext2/3/4 and connect it to the Raspberry Pi
-5. Create a cache folder `mkdir cache` in the root of MinimalPi
-6. Create the MinimalPi image
+1. Download the latest image from https://sourceforge.net/projects/rpip1reader/files/
+2. Write the image to your SD card with e.g. https://sourceforge.net/projects/win32diskimager/
+3. Change the settings in the cmdline.txt
+4. Put the SD card in your Raspberry Pi and boot
 
 ## Connecting the P1 to the Raspberry Pi
 Use the following scheme to connect the P1 port to the Raspberry Pi (other methods will work as well, but this is how i did it)<br /><br />

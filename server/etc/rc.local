@@ -14,7 +14,11 @@
 export PYTHONPATH=/usr/lib/python2.6/
 export PYTHONHOME=/usr/lib/python2.6/
 
-mount /dev/sda1 /cache
+sed -i "s/\[password\]/$(sed -e 's/[\ ]/\n/g' /proc/cmdline | sed -ne 's/wlan.password=\(.*\)/\1/p')/g" /etc/network/interfaces
+sed -i "s/\[ssid\]/$(sed -e 's/[\ ]/\n/g' /proc/cmdline | sed -ne 's/wlan.ssid=\(.*\)/\1/p')/g" /etc/network/interfaces
+
+ifup wlan0
+ifup eth0
 
 echo "0 * * * * /mysql.py" >> /cron.txt
 

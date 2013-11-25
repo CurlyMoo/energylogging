@@ -1,0 +1,60 @@
+#!/bin/bash
+
+PATH=/sbin:/bin:/usr/sbin:/usr/bin
+
+. /lib/lsb/init-functions
+
+DAEMON=/bin/ntpd
+PIDFILE=/var/run/ntpd.pid
+SERVERS[0]="nl.pool.ntp.org"
+SERVERS[1]="de.pool.ntp.org"
+SERVERS[2]="be.pool.ntp.org"
+SERVERS[3]="lu.pool.ntp.org"
+I=0;
+
+test -x $DAEMON || exit 5
+
+case $1 in
+	start)
+		log_daemon_msg "Starting NTP server" "ntpd"
+		while [ $(date | grep -c 1970) -eq 1 ]; do
+			if [ $(ifconfig | grep "wlan0" -A 1 | grep -c "inet addr") -eq 1 ] || [ $(ifconfig | grep "eth0" -A 1 | grep -c "inet addr") -eq 1 ]; then
+				if [ $(pgrep ntpd | wc -l) -eq 0 ]; then
+			                $DAEMON -q -p ${SERVERS[$I]} 2>/dev/null;
+			                I=$(($I+1));
+			                if [ $I -ge 4 ]; then
+			                        I=0;
+			                fi
+				fi
+		        fi
+		        sleep 1;
+		done &
+		log_end_msg $?
+  		;;
+	stop)
+		log_daemon_msg "Stopping NTP server" "ntpd"
+  		start-stop-daemon --stop --quiet --oknodo --pidfile $PIDFILE
+		log_end_msg $?
+		rm -f $PIDFILE
+  		;;
+	restart|force-reload)
+		$0 stop && sleep 2 && $0 start
+  		;;
+	try-restart)
+		if $0 status >/dev/null; then
+			$0 restart
+		else
+			exit 0
+		fi
+		;;
+	reload)
+		exit 3
+		;;
+	status)
+		status_of_proc $DAEMON "NTP server"
+		;;
+	*)
+		echo "Usage: $0 {start|stop|restart|try-restart|force-reload|status}"
+		exit 2
+		;;
+esac

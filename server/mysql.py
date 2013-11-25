@@ -2,31 +2,79 @@
 import MySQLdb as mdb
 import sys
 import os
+import warnings
+import re
+warnings.filterwarnings("ignore", "Unknown table.*")
 
-con = None
+password = None;
+database = None;
+username = None;
+host = None;
 
-con = mdb.connect('X.X.X.X', '*username*', '*password*', '*database*');
+f = open('/proc/cmdline', 'r');
+cmdline = f.read();
+f.close();
 
-os.rename('/cache/queries.sql','/cache/queries.sql.process')
+try:
+        reg = re.search(r"mysql.password=([\w]+)", cmdline);
+        password = reg.group(1);
+finally:
+        x = 1;
 
-lines = open('/cache/queries.sql.process').readlines()
+try:
+        reg = re.search(r"mysql.username=([\w]+)", cmdline);
+        username = reg.group(1);
+finally:
+        x = 1;
+
+try:
+        reg = re.search(r"mysql.host=([0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3})", cmdline);
+        host = reg.group(1);
+finally:
+        x = 1;
+
+try:
+        reg = re.search(r"mysql.database=([\w]+)", cmdline);
+        database = reg.group(1);
+finally:
+        x = 1;
+
+if username is None or password is None or host is None or database is None:
+        exit(0);
+
+
+try:
+        con = None
+        con = mdb.connect(host, username, password, database);
+finally:
+        exit(0)
+
+try:
+        os.rename('/cache/queries.sql','/cache/queries.sql.process')
+
+        lines = open('/cache/queries.sql.process').readlines()
+finally:
+        a=0
 
 x=0;
 for i, line in enumerate(lines[:]):
-	try:
-		cur = con.cursor()	
-		cur.execute(line)
-		con.commit()
-	finally:
-		cur.close()
-		#print i
-		#print line
-		if((i-x)<len(lines)):
-			del lines[i-x]
-			x+=1;
+        try:
+                cur = con.cursor()
+                cur.execute(line)
+                con.commit()
+        finally:
+                cur.close()
+                #print i
+                #print line
+                if((i-x)<len(lines)):
+                        del lines[i-x]
+                        x+=1;
 
-open('/cache/queries.sql', 'a').writelines(lines)
-os.remove('/cache/queries.sql.process')
+try:
+        open('/cache/queries.sql', 'a').writelines(lines)
+        os.remove('/cache/queries.sql.process')
+finally:
+        a=0
 
 try:
 	cur = con.cursor()
@@ -51,5 +99,6 @@ try:
 finally:
 	x=1;
 
-if con:    
-	con.close()
+if con:
+        con.close()
+

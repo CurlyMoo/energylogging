@@ -2,15 +2,11 @@
 import sys
 import os
 import time
-import datetime
 import serial
 import re
+import datetime
 import MySQLdb as mdb
 from subprocess import call
-
-DAEMONIZE=1
-LOG=1
-DISPLAY=0
 
 ser = serial.Serial()
 ser.baudrate = 9600
@@ -34,7 +30,7 @@ newElecticityRateGeneratedPeak=0
 oldElecticityRateGeneratedPeak=0
 newElecticityCurrentRate=0
 oldElecticityCurrentRate=0
-newElecticityTotalUsed=0
+newEecticityTotalUsed=0
 oldElecticityTotalUsed=0
 newElecticityTotalGenerated=0
 oldElecticityTotalGenerated=0
@@ -54,30 +50,29 @@ try:
 except:
     sys.exit ("Fout bij het openen van %s. Programma afgebroken."  % ser.name)
 
-if(DAEMONIZE == 1):
-	try:
-		pid = os.fork();
-		if pid > 0:
-			exit(0)
-	except OSError, e:
-		exit(1)
-		
-	os.chdir("/")
-	os.setsid()
-	os.umask(0)
-
-	try:
-		pid = os.fork()
-		if pid > 0:
-			exit(0)
-	except OSError, e:
-		exit(1)
+try:
+	pid = os.fork();
+	if pid > 0:
+		exit(0)
+except OSError, e:
+	exit(1)
+	
+os.chdir("/")
+os.setsid()
+os.umask(0)
+	
+try:
+	pid = os.fork()
+	if pid > 0:
+		exit(0)
+except OSError, e:
+	exit(1)
 
 now = datetime.datetime.now();
 
 while(now.year == 1970):
-	now = datetime.datetime.now();	
-        time.sleep(1)
+	now = datetime.datetime.now();
+	time.sleep(1)
 
 while(1):
 	p1_teller=0
@@ -122,63 +117,58 @@ while(1):
 		
 			try:
 				file = open("/cache/queries.sql", "a")
-			except:
-				print "Failed to open /cache/queries.sql"			
+				
+				if(newElecticitySerial != oldElecticitySerial):
+					oldElecticitySerial = newElecticitySerial;
+					file.write("INSERT INTO devices (name, type_id) VALUES ('%s', (SELECT type_id FROM device_types WHERE name = \'electricity\')) ON DUPLICATE KEY UPDATE name = '%s', type_id = (SELECT type_id FROM device_types WHERE name = \'electricity\');\n" % (newElecticitySerial, newElecticitySerial))
+				if(newGasSerial != oldGasSerial):
+					oldGasSerial = newGasSerial;
+					file.write("INSERT INTO devices (name, type_id) VALUES ('%s', (SELECT type_id FROM device_types WHERE name = \'gas\')) ON DUPLICATE KEY UPDATE name = '%s', type_id = (SELECT type_id FROM device_types WHERE name = \'gas\');\n" % (newGasSerial, newGasSerial))
+				if(newElecticityRateUsedOffPeak != oldElecticityRateUsedOffPeak):
+					oldElecticityRateUsedOffPeak = newElecticityRateUsedOffPeak
+					file.write("INSERT INTO consumption (dev_id, rate_id, `usage`, `datetime`, direction) VALUES ((SELECT dev_id FROM devices WHERE name = '%s'), (SELECT rate_id FROM rate_types WHERE name = 'low'), %.2f, '%s', 0);\n" % (newElecticitySerial, newElecticityRateUsedOffPeak, str(time.strftime('%Y-%m-%d %H:%M:%S'))))
+				if(newElecticityRateUsedPeak != oldElecticityRateUsedPeak):
+					oldElecticityRateUsedPeak = newElecticityRateUsedPeak
+					file.write("INSERT INTO consumption (dev_id, rate_id, `usage`, `datetime`, direction) VALUES ((SELECT dev_id FROM devices WHERE name = '%s'), (SELECT rate_id FROM rate_types WHERE name = 'high'), %.2f, '%s', 0);\n" % (newElecticitySerial, newElecticityRateUsedPeak, str(time.strftime('%Y-%m-%d %H:%M:%S'))))
+				if(newElecticityRateGeneratedOffPeak != oldElecticityRateGeneratedOffPeak):
+					oldElecticityRateGeneratedOffPeak = newElecticityRateGeneratedOffPeak
+					file.write("INSERT INTO consumption (dev_id, rate_id, `usage`, `datetime`, direction) VALUES ((SELECT dev_id FROM devices WHERE name = '%s'), (SELECT rate_id FROM rate_types WHERE name = 'low'), %.2f, '%s', 1);\n" % (newElecticitySerial, newElecticityRateGeneratedOffPeak, str(time.strftime('%Y-%m-%d %H:%M:%S'))))
+				if(newElecticityRateGeneratedPeak != oldElecticityRateGeneratedPeak):
+					oldElecticityRateGeneratedPeak = newElecticityRateGeneratedPeak
+					file.write("INSERT INTO consumption (dev_id, rate_id, `usage`, `datetime`, direction) VALUES ((SELECT dev_id FROM devices WHERE name = '%s'), (SELECT rate_id FROM rate_types WHERE name = 'high'), %.2f, '%s'), 1);\n" % (newElecticitySerial, newElecticityRateGeneratedPeak, str(time.strftime('%Y-%m-%d %H:%M:%S'))))
+				if(newGasTotal != oldGasTotal):
+					oldGasTotal = newGasTotal
+					file.write("INSERT INTO consumption (dev_id, rate_id, `usage`, `datetime`, direction) VALUES ((SELECT dev_id FROM devices WHERE name = '%s'), (SELECT rate_id FROM rate_types WHERE name = 'both'), %.3f, '%s', 0);\n" % (newGasSerial, newGasTotal, str(time.strftime('%Y-%m-%d %H:%M:%S'))))
+
+#                                print "-- ENERGIEMETER --"
+#                                print ""
+#                                print "Serienummer:\t\t"+newElecticitySerial
+#                                print ""
+#                                print "- Verbruikt"
+#                                print "Daltarief:\t\t"+str(newElecticityRateUsedOffPeak)+"kWh"
+#                                print "Piektarief:\t\t"+str(newElecticityRateUsedPeak)+"kWh"
+#                                print ""
+#                                print "- Teruggeleverd"
+#                                print "Daltarief:\t\t"+str(newElecticityRateGeneratedOffPeak)+"kWh"
+#                                print "Piektarief:\t\t"+str(newElecticityRateGeneratedPeak)+"kWh"
+#                                print ""
+#                                print "Huidige tarief:\t\t"+str(newElecticityCurrentRate)
+#                                print ""
+#                                print "Totaal verbruikt:\t"+str(newElecticityTotalUsed)
+#                                print "Totaal teruggeleverd:\t"+str(newElecticityTotalGenerated)
+#                                print ""
+#                                print "Stand schakelaar:\t"+newElecticitySwitchPosition
+#                                print ""
+#                                print "-- GASMETER --"
+#                                print ""
+#                                print "Serienummer:\t\t"+newGasSerial
+#                                print "Log datum/tijd:\t\t"+newGasLogDateTime
+#                                print "Totaal:\t\t\t"+str(newGasTotal)+"m3"
+
+                        except:
+                                print "Fout bij het openen van /cache/queries.sql."
+
+                        finally:
                                 file.close();
-
-			try:							
-				if(LOG==1):
-					if(newElecticitySerial != oldElecticitySerial):
-						oldElecticitySerial = newElecticitySerial;
-						file.write("INSERT INTO devices (name, type_id) VALUES ('%s', (SELECT type_id FROM device_types WHERE name = \'electricity\')) ON DUPLICATE KEY UPDATE name = '%s', type_id = (SELECT type_id FROM device_types WHERE name = \'electricity\');\n" % (newElecticitySerial, newElecticitySerial))
-					if(newGasSerial != oldGasSerial):
-						oldGasSerial = newGasSerial;
-						file.write("INSERT INTO devices (name, type_id) VALUES ('%s', (SELECT type_id FROM device_types WHERE name = \'gas\')) ON DUPLICATE KEY UPDATE name = '%s', type_id = (SELECT type_id FROM device_types WHERE name = \'gas\');\n" % (newGasSerial, newGasSerial))
-					if(newElecticityRateUsedOffPeak != oldElecticityRateUsedOffPeak):
-						oldElecticityRateUsedOffPeak = newElecticityRateUsedOffPeak
-						file.write("INSERT INTO consumption (dev_id, rate_id, `usage`, `datetime`, direction) VALUES ((SELECT dev_id FROM devices WHERE name = '%s'), (SELECT rate_id FROM rate_types WHERE name = 'low'), %.2f, '%s', 0);\n" % (newElecticitySerial, newElecticityRateUsedOffPeak, str(time.strftime('%Y-%m-%d %H:%M:%S'))))
-					if(newElecticityRateUsedPeak != oldElecticityRateUsedPeak):
-						oldElecticityRateUsedPeak = newElecticityRateUsedPeak
-						file.write("INSERT INTO consumption (dev_id, rate_id, `usage`, `datetime`, direction) VALUES ((SELECT dev_id FROM devices WHERE name = '%s'), (SELECT rate_id FROM rate_types WHERE name = 'high'), %.2f, '%s', 0);\n" % (newElecticitySerial, newElecticityRateUsedPeak, str(time.strftime('%Y-%m-%d %H:%M:%S'))))
-					if(newElecticityRateGeneratedOffPeak != oldElecticityRateGeneratedOffPeak):
-						oldElecticityRateGeneratedOffPeak = newElecticityRateGeneratedOffPeak
-						file.write("INSERT INTO consumption (dev_id, rate_id, `usage`, `datetime`, direction) VALUES ((SELECT dev_id FROM devices WHERE name = '%s'), (SELECT rate_id FROM rate_types WHERE name = 'low'), %.2f, '%s', 1);\n" % (newElecticitySerial, newElecticityRateGeneratedOffPeak, str(time.strftime('%Y-%m-%d %H:%M:%S'))))
-					if(newElecticityRateGeneratedPeak != oldElecticityRateGeneratedPeak):
-						oldElecticityRateGeneratedPeak = newElecticityRateGeneratedPeak
-						file.write("INSERT INTO consumption (dev_id, rate_id, `usage`, `datetime`, direction) VALUES ((SELECT dev_id FROM devices WHERE name = '%s'), (SELECT rate_id FROM rate_types WHERE name = 'high'), %.2f, '%s', 1);\n" % (newElecticitySerial, newElecticityRateGeneratedPeak, str(time.strftime('%Y-%m-%d %H:%M:%S'))))
-					if(newGasTotal != oldGasTotal):
-						oldGasTotal = newGasTotal
-						file.write("INSERT INTO consumption (dev_id, rate_id, `usage`, `datetime`, direction) VALUES ((SELECT dev_id FROM devices WHERE name = '%s'), (SELECT rate_id FROM rate_types WHERE name = 'both'), %.3f, '%s', 0);\n" % (newGasSerial, newGasTotal, str(time.strftime('%Y-%m-%d %H:%M:%S'))))
-			except:
-				print "Failed to write querie(s) to /cache/queries.sql"
-
-			try:
-				if(DISPLAY == 1):
-		                        print "-- ENERGIEMETER --"
-		                        print ""
-		                        print "Serienummer:\t\t"+newElecticitySerial
-		                        print ""
-		                        print "- Verbruikt"
-		                        print "Daltarief:\t\t"+str(newElecticityRateUsedOffPeak)+"kWh"
-			                print "Piektarief:\t\t"+str(newElecticityRateUsedPeak)+"kWh"
-		        	        print ""
-		                        print "- Teruggeleverd"
-		                        print "Daltarief:\t\t"+str(newElecticityRateGeneratedOffPeak)+"kWh"
-		                        print "Piektarief:\t\t"+str(newElecticityRateGeneratedPeak)+"kWh"
-		                        print ""
-		                        print "Huidige tarief:\t\t"+str(newElecticityCurrentRate)
-		                        print ""
-		                        print "Totaal verbruikt:\t"+str(newElecticityTotalUsed)
-		                        print "Totaal teruggeleverd:\t"+str(newElecticityTotalGenerated)
-		                        print ""
-		                        print "Stand schakelaar:\t"+str(newElecticitySwitchPosition)
-		                        print ""
-		                        print "-- GASMETER --"
-	        	                print ""
-		                        print "Serienummer:\t\t"+newGasSerial
-		                        print "Log datum/tijd:\t\t"+newGasLogDateTime
-		                        print "Totaal:\t\t\t"+str(newGasTotal)+"m3"
-			except:
-				print "Failed to print log data"
 
 ser.close();
