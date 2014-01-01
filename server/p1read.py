@@ -90,29 +90,29 @@ while(1):
 
 	if p1_teller == 20:
 		for i, line in enumerate(lines[:]):
-                        if(re.match("[0-9]-[0-9]:96.1.1.*",line)):
+                        if ":96.1.1(" in line:
                                 newElecticitySerial = str(re.search("[0-9]-[0-9]:96.1.1\((.*)\)",line).group(1))
-                        if(re.match("[0-9]-[0-9]:1.8.1.*",line)):
+                        elif ":1.8.1(" in line:
                                 newElecticityRateUsedOffPeak = float("{0:.2f}".format(float(re.search("[0-9]-[0-9]:1.8.1\([0]{1,}(.*)\*kWh\)",line).group(1))))
-                        if(re.match("[0-9]-[0-9]:1.8.2.*",line)):
+                        elif ":1.8.2(" in line:
                                 newElecticityRateUsedPeak = float("{0:.2f}".format(float(re.search("[0-9]-[0-9]:1.8.2\([0]{1,}(.*)\*kWh\)",line).group(1))))
-                        if(re.match("[0-9]-[0-9]:2.8.1.*",line)):
+                        elif ":2.8.1(" in line:
                                 newElecticityRateGeneratedOffPeak = float("{0:.2f}".format(float(re.search("[0-9]-[0-9]:2.8.1\([0]{1,}(.*)\*kWh\)",line).group(1))))
-                        if(re.match("[0-9]-[0-9]:2.8.2.*",line)):
+                        elif ":2.8.2(" in line:
                                 newElecticityRateGeneratedPeak = float("{0:.2f}".format(float(re.search("[0-9]-[0-9]:2.8.2\([0]{1,}(.*)\*kWh\)",line).group(1))))
-                        if(re.match("[0-9]-[0-9]:96.14.0.*",line)):
+                        elif ":96.14.0(" in line:
                                 newElecticityCurrentRate = re.search("[0-9]-[0-9]:96.14.0\([0]{1,}(.*)\)",line).group(1)
-                        if(re.match("[0-9]-[0-9]:1.7.0.*",line)):
+                        elif ":1.7.0(" in line:
                                 newElecticityTotalUsed = float("{0:.2f}".format(float(re.search("[0-9]-[0-9]:1.7.0\([0]{1,}(.*)\*kW\)",line).group(1))))
-                        if(re.match("[0-9]-[0-9]:2.7.0.*",line)):
+                        elif ":2.7.0(" in line:
                                 newElecticityTotalGenerated = float("{0:.2f}".format(float(re.search("[0-9]-[0-9]:2.7.0\([0]{1,}(.*)\*kW\)",line).group(1))))
-                        if(re.match("[0-9]-[0-9]:96.3.10.*",line)):
+                        elif ":96.3.10(" in line:
                                 newElecticitySwitchPosition = float("{0:.2f}".format(float(re.search("[0-9]-[0-9]:96.3.10\((.*)\)",line).group(1))))
-                        if(re.match("[0-9]-[0-9]:96.1.0.*",line)):
+                        elif ":96.1.0(" in line:
                                 newGasSerial = re.search("[0-9]-[0-9]:96.1.0\((.*)\)",line).group(1)
-                        if(re.match("[0-9]-[0-9]:24.3.0.*",line)):
+                        elif ":24.3.0(" in line:
                                 newGasLogDateTime = re.search("[0-9]-[0-9]:24.3.0\(([0-9]{1,})\).*",line).group(1)
-                        if(re.match(".*[0-9]-[0-9]:24.3.0.*",line)):
+                        elif ":24.3.0" in line:
                                 newGasTotal = float(re.search("\([0]{1,}(.*)\)",lines[i+1]).group(1))
 		
 			try:
