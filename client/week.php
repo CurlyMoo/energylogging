@@ -18,7 +18,7 @@ $rConnect = mysql_connect('127.0.0.1', 'username', 'password');
 $rDatabase = mysql_select_db('database');
 
 
-$rWeek = mysql_query("SELECT WEEK(`datetime`) AS week, `usage` FROM consumption WHERE DAYNAME(`datetime`) = 'Monday' GROUP BY WEEK(`datetime`), rate_id ORDER BY WEEK(`datetime`), rate_id") or die(mysql_error());
+$rWeek = mysql_query("SELECT WEEK(`datetime`) AS week, `usage` FROM consumption WHERE DAYNAME(`datetime`) = 'Monday' GROUP BY WEEK(`datetime`), rate_id ORDER BY YEAR(`datetime`), WEEK(`datetime`), rate_id") or die(mysql_error());
 		
 /* Make sure all missing hours are shows with zero's */
 $iWeek = 0;
