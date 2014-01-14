@@ -2,7 +2,7 @@
 header('Content-Type: text/html; charset=utf-8');
 
 $rConnect = mysql_connect('x.x.x.x', '*username*', '*password*');
-$rDatabase = mysql_select_db('log');
+$rDatabase = mysql_select_db('*database*');
 
 
 $rWeek = mysql_query("SELECT UNIX_TIMESTAMP(`datetime`) as `date`, YEAR(`datetime`) as `year`, WEEK(`datetime`) AS week, `usage` FROM consumption WHERE DAYNAME(`datetime`) = 'Monday' GROUP BY WEEK(`datetime`), rate_id ORDER BY YEAR(`datetime`), WEEK(`datetime`), rate_id") or die(mysql_error());
