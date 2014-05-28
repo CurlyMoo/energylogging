@@ -1,32 +1,45 @@
-<?PHP 
+<?PHP
 header('Content-Type: text/html; charset=utf-8');
+
 $rConnect = mysql_connect('x.x.x.x', '*username*', '*password*');
 $rDatabase = mysql_select_db('*database*');
 
+if(file_exists("gas.json")) {
+	$sContent = file_get_contents("gas.json");
+} else {
+	$sContent = '';
+}
+$iLen = strlen($sContent);
+$sLContent = substr($sContent, $iLen-60, $iLen);
+$iLDateTime = 0;
+if(preg_match('("x": ([0-9]{13})+)', $sLContent, $aMatches) > 0) {
+	$iLDateTime = $aMatches[1]/1000;
+}
 
-$rDayGas = mysql_query("SELECT * FROM gas") or die(mysql_error());
+$rDayGas = mysql_query("SELECT * FROM gas WHERE `datetime` > ".$iLDateTime." ORDER BY `datetime`") or die(mysql_error());
 $rTS = mysql_query("SELECT TIMEDIFF(NOW(), UTC_TIMESTAMP) as ts");
 $aTS = mysql_fetch_assoc($rTS);
 
 /* Make sure all missing hours are shows with zero's */
 $aPrevGas = Array();
-$sJson = '[';
+if($iLen == 0) {
+	$sJson = '[';
+} else {
+	$sJson = substr($sContent, 0, -1).",";
+}
+
 while($aDayGas = mysql_fetch_assoc($rDayGas)) {
 	if(count($aPrevGas) > 1) {
 		$iDay = 0;
-		$bDaySet = false;
-		$iDatePrev = $aPrevGas['datetime']/3600;
-		$iDateCur = $aDayGas['datetime']/3600;
+		$bDaySet = false;	
+		$iDatePrev = $aPrevGas['hour'];
+		$iDateCur = date("H", $aDayGas['datetime'])+(int)(substr($aTS['ts'], 0, 2));
 		$iHourPrev = $aPrevGas['hour'];
-		
 		$iMissingHours = $iDateCur-$iDatePrev;
+		if($iMissingHours < 0) {
+			$iMissingHours += 24;
+		}
 		$iHourNew = $iHourPrev;		
-
-		// $aDate = new DateTime(date("Y-m-d H:i:s", $aDayGas['datetime']-(($aTS['ts']+1)*3600)), new DateTimeZone(date_default_timezone_get()));
-		// if($aDate->format('I') == 0) {
-			// $aDayGas['hour'] -= $aTS['ts'];
-			// $aDayGas['datetime'] -= $aTS['ts']*3600;
-		// }
 
 		if($iMissingHours > 1) {
 			for($i=0;$i<$iMissingHours-1;$i++) {
@@ -35,8 +48,9 @@ while($aDayGas = mysql_fetch_assoc($rDayGas)) {
 					$iHourNew = 0;
 					$iDay++;
 				}
-				$iDT = (($iDatePrev*3600)+($iDay*3600)+(($iHourNew-$iHourPrev)*3600));
-				if(date("H", $iDT) > 23 || date("H", $iDT) <= 7) {
+				$iDT = (($aPrevGas['datetime'])+($iDay*3600)+(($iHourNew-$iHourPrev)*3600));
+
+				if(date("H", $iDT) >= 23 || date("H", $iDT) < 7) {
 					$sJson .= '{"x": '.$iDT.'000, "y": 0, "color": "#2f7ed8"},';
 				} else {
 					$sJson .= '{"x": '.$iDT.'000, "y": 0, "color": "#ffc600"},';
@@ -44,7 +58,7 @@ while($aDayGas = mysql_fetch_assoc($rDayGas)) {
 			}
 		}
 
-		if($aDayGas['hour'] > 23 || $aDayGas['hour'] <= 7) {
+		if(date("H", $aDayGas['datetime']) >= 23 || date("H", $aDayGas['datetime']) < 7) {
 			$sJson .= '{"x": '.$aDayGas['datetime'].'000, "y": '.$aDayGas['m3'].', "color": "#2f7ed8"},';
 		} else {
 			$sJson .= '{"x": '.$aDayGas['datetime'].'000, "y": '.$aDayGas['m3'].', "color": "#ffc600"},';
@@ -52,6 +66,7 @@ while($aDayGas = mysql_fetch_assoc($rDayGas)) {
 	}
 	$aPrevGas = $aDayGas;
 }
-$sJson = substr($sJson, 0, -1);
-echo $sJson .= ']';
+$sJson = substr($sJson, 0, -1)."]";
+file_put_contents("gas.json", $sJson);
+echo $sJson;
 ?>
