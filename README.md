@@ -28,4 +28,4 @@ Use the `tables.sql` to set up the MySQL database
 
 ## Final result
 
-<img src="http://img822.imageshack.us/img822/5246/m54p.jpg" alt="Final result" title="Final result" />
+<img src="http://www.pilight.org/p1meter.jpg" alt="Final result" title="Final result" />
