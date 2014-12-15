@@ -16,7 +16,7 @@
 
 ## Connecting the P1 to the Raspberry Pi
 Use the following scheme to connect the P1 port to the Raspberry Pi (other methods will work as well, but this is how i did it)<br /><br />
-<img src="http://img208.imageshack.us/img208/3122/awlt.jpg" alt="Schematic" title="Schematic" />
+<img src="http://www.pilight.org/smartmeter.png" alt="Schematic" title="Schematic" />
 
 ## Setting up the database
 Use the `tables.sql` to set up the MySQL database
