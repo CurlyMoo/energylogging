@@ -9,10 +9,16 @@ import MySQLdb as mdb
 from subprocess import call
 
 ser = serial.Serial()
-ser.baudrate = 9600
+# New Meters:
+ser.baudrate = 115200
 ser.bytesize=serial.SEVENBITS
-ser.parity=serial.PARITY_EVEN
+ser.parity=serial.PARITY_ODD
 ser.stopbits=serial.STOPBITS_ONE
+# Old Meters:
+#ser.baudrate = 9600
+#ser.bytesize=serial.SEVENBITS
+#ser.parity=serial.PARITY_EVEN
+#ser.stopbits=serial.STOPBITS_ONE
 ser.xonxoff=0
 ser.rtscts=0
 ser.timeout=20
