@@ -18,36 +18,45 @@ f.close();
 try:
         reg = re.search(r"mysql.password=([\w]+)", cmdline);
         password = reg.group(1);
+except:
+        exit(0);
 finally:
-        x = 1;
+        pass;
 
 try:
         reg = re.search(r"mysql.username=([\w]+)", cmdline);
         username = reg.group(1);
+except:
+        exit(0);
 finally:
-        x = 1;
+        pass;
 
 try:
         reg = re.search(r"mysql.host=([0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3})", cmdline);
         host = reg.group(1);
+except:
+        exit(0);
 finally:
-        x = 1;
+        pass;
 
 try:
         reg = re.search(r"mysql.database=([\w]+)", cmdline);
         database = reg.group(1);
+except:
+        exit(0);
 finally:
-        x = 1;
+        pass;
 
 if username is None or password is None or host is None or database is None:
         exit(0);
 
-
 try:
         con = None
         con = mdb.connect(host, username, password, database);
-finally:
+except:
         exit(0)
+finally:
+	pass
 
 try:
         os.rename('/cache/queries.sql','/cache/queries.sql.process')
