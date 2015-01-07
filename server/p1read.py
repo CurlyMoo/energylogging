@@ -108,17 +108,17 @@ while(1):
                                 newElecticityRateGeneratedPeak = float("{0:.2f}".format(float(re.search("[0-9]-[0-9]:2.8.2\([0]{1,}(.*)\*kWh\)",line).group(1))))
                         elif ":96.14.0(" in line:
                                 newElecticityCurrentRate = re.search("[0-9]-[0-9]:96.14.0\([0]{1,}(.*)\)",line).group(1)
-                        elif ":1.7.0(" in line:
+                        elif ":1.7.0(" in line: /rm
                                 newElecticityTotalUsed = float("{0:.2f}".format(float(re.search("[0-9]-[0-9]:1.7.0\([0]{1,}(.*)\*kW\)",line).group(1))))
                         elif ":2.7.0(" in line:
                                 newElecticityTotalGenerated = float("{0:.2f}".format(float(re.search("[0-9]-[0-9]:2.7.0\([0]{1,}(.*)\*kW\)",line).group(1))))
                         elif ":96.3.10(" in line:
-                                newElecticitySwitchPosition = float("{0:.2f}".format(float(re.search("[0-9]-[0-9]:96.3.10\((.*)\)",line).group(1))))
+                                newElecticitySwitchPosition = newElecticitySwitchPosition = re.search("[0-9]-[0-9]:96.3.10\((.*)\)",line).group(1)
                         elif ":96.1.0(" in line:
                                 newGasSerial = re.search("[0-9]-[0-9]:96.1.0\((.*)\)",line).group(1)
-                        elif ":24.3.0(" in line:
-                                newGasLogDateTime = re.search("[0-9]-[0-9]:24.3.0\(([0-9]{1,})\).*",line).group(1)
-                        elif ":24.3.0" in line:
+                        elif ":24.2.1(" in line:
+                                newGasLogDateTime = re.search("[0-9]-[0-9]:24.2.1\(([0-9A-Za-z]{1,})\).*",line).group(1)
+                        elif ":24.2.1" in line:
                                 newGasTotal = float(re.search("\([0]{1,}(.*)\)",lines[i+1]).group(1))
 		
 			try:
