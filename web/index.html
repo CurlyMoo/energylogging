@@ -1,0 +1,482 @@
+<!DOCTYPE HTML>
+<html>
+<head style="margin: 0px; padding: 0px;">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<title>Energy Logging</title>
+<script type="text/javascript" src="js/jquery.min.js"></script>
+<script type="text/javascript">
+	$(function() {
+		$.getJSON('electricity.php', function(data) {
+
+			// create the chart
+			$('#electricity').highcharts('StockChart', {
+				chart: {
+					alignTicks: false
+				},
+
+				rangeSelector: {
+					selected: 0,
+					buttons: [{
+						type: 'hour',
+						count: 12,
+						text: '12h'
+					}, {
+						type: 'day',
+						count: 1,
+						text: '1d'
+					}, {
+						type: 'week',
+						count: 1,
+						text: '1w'
+					}, {
+						type: 'month',
+						count: 1,
+						text: '1m'
+					}, {
+						type: 'month',
+						count: 6,
+						text: '6m'
+					}, {
+						type: 'year',
+						count: 1,
+						text: '1y'
+					}, {
+						type: 'all',
+						text: 'All'
+					}],
+				},
+
+				title: {
+					text: 'Electricity used'
+				},
+
+				credits: {
+					enabled: false
+				},
+
+				exporting: {
+					enabled: false
+				},
+
+				series: [{
+					type: 'column',
+					name: 'Watt',
+					data: data,
+					turboThreshold: 10000000,
+					dataGrouping: {
+						units: [
+							[ 'minute', [ 15, 60 ] ],
+							[ 'hour', [ 24 ] ],
+							[ 'day', [ 7 ] ], 
+							[ 'week', [ 4 ] ], 
+							[ 'month', [ 12 ] ],
+							[ 'year', null ] ]
+					}
+				}]
+			});
+		});
+
+	$.getJSON('solar_netto.php', function(data) {
+
+			// create the chart
+			$('#solar').highcharts('StockChart', {
+				chart: {
+					alignTicks: false
+				},
+
+				rangeSelector: {
+					selected: 0,
+					buttons: [{
+						type: 'hour',
+						count: 12,
+						text: '12h'
+					}, {
+						type: 'day',
+						count: 1,
+						text: '1d'
+					}, {
+						type: 'week',
+						count: 1,
+						text: '1w'
+					}, {
+						type: 'month',
+						count: 1,
+						text: '1m'
+					}, {
+						type: 'month',
+						count: 6,
+						text: '6m'
+					}, {
+						type: 'year',
+						count: 1,
+						text: '1y'
+					}, {
+						type: 'all',
+						text: 'All'
+					}],
+				},
+
+				title: {
+					text: 'Electricity overcapacity'
+				},
+
+				credits: {
+					enabled: false
+				},
+
+				exporting: {
+					enabled: false
+				},
+
+				series: [{
+					type: 'column',
+					name: 'Watt',
+					data: data,
+					turboThreshold: 10000000,
+					dataGrouping: {
+						units: [
+							[ 'minute', [ 15, 60 ] ],
+							[ 'hour', [ 24 ] ],
+							[ 'day', [ 7 ] ], 
+							[ 'week', [ 4 ] ], 
+							[ 'month', [ 12 ] ],
+							[ 'year', null ] ]
+					}
+				}]
+			});
+		});
+
+	$.getJSON('solar_bruto.php', function(data) {
+
+			// create the chart
+			$('#solar1').highcharts('StockChart', {
+				chart: {
+					alignTicks: false
+				},
+
+				rangeSelector: {
+					selected: 0,
+					buttons: [{
+						type: 'hour',
+						count: 12,
+						text: '12h'
+					}, {
+						type: 'day',
+						count: 1,
+						text: '1d'
+					}, {
+						type: 'week',
+						count: 1,
+						text: '1w'
+					}, {
+						type: 'month',
+						count: 1,
+						text: '1m'
+					}, {
+						type: 'month',
+						count: 6,
+						text: '6m'
+					}, {
+						type: 'year',
+						count: 1,
+						text: '1y'
+					}, {
+						type: 'all',
+						text: 'All'
+					}],
+				},
+
+				title: {
+					text: 'Solar panel performance'
+				},
+
+				credits: {
+					enabled: false
+				},
+
+				exporting: {
+					enabled: false
+				},
+
+				series: [{
+					type: 'column',
+					name: 'Totaal',
+					data: data['total'],
+					color: '#ffc600',
+					turboThreshold: 10000000,
+					dataGrouping: {
+						units: [
+							[ 'minute', [ 15, 60 ] ],
+							[ 'hour', [ 24 ] ],
+							[ 'day', [ 7 ] ], 
+							[ 'week', [ 4 ] ], 
+							[ 'month', [ 12 ] ],
+							[ 'year', null ] ]
+					}
+				},{
+					type: 'spline',
+					name: 'Zuid',
+					data: data['south'],
+					color: '#ca697c',
+					turboThreshold: 10000000,
+					dataGrouping: {
+						units: [
+							[ 'minute', [ 15, 60 ] ],
+							[ 'hour', [ 24 ] ],
+							[ 'day', [ 7 ] ], 
+							[ 'week', [ 4 ] ], 
+							[ 'month', [ 12 ] ],
+							[ 'year', null ] ]
+					}
+				},{
+					type: 'spline',
+					name: 'Noord',
+					data: data['north'],
+					color: '#2f7ed8',
+					turboThreshold: 10000000,
+					dataGrouping: {
+						units: [
+							[ 'minute', [ 15, 60 ] ],
+							[ 'hour', [ 24 ] ],
+							[ 'day', [ 7 ] ], 
+							[ 'week', [ 4 ] ], 
+							[ 'month', [ 12 ] ],
+							[ 'year', null ] ]
+					}
+				}]
+			});
+		});
+
+		$.getJSON('solar_total.php', function(data) {
+			// create the chart
+			$('#solar2').highcharts('StockChart', {
+				chart: {
+					alignTicks: false
+				},
+
+				rangeSelector: {
+					selected: 0,
+						buttons: [{
+							type: 'hour',
+							count: 12,
+							text: '12h'
+						}, {
+							type: 'day',
+							count: 1,
+							text: '1d'
+						}, {
+							type: 'week',
+							count: 1,
+							text: '1w'
+						}, {
+							type: 'month',
+							count: 1,
+							text: '1m'
+						}, {
+							type: 'month',
+							count: 6,
+							text: '6m'
+						}, {
+							type: 'year',
+							count: 1,
+							text: '1y'
+						}, {
+							type: 'all',
+							text: 'All'
+						}],
+					},
+
+				title: {
+					text: 'Solar power generated'
+				},
+
+				credits: {
+					enabled: false
+				},
+				
+				exporting: {
+					enabled: false
+				},
+					
+				tooltip: {
+					valueDecimals: 0
+				},
+
+				series: [{
+					type: 'column',
+					name: 'watt',
+					data: data,
+					turboThreshold: 10000000,
+					dataGrouping: {
+						units: [
+							[ 'minute', [ 15, 60 ] ],
+							[ 'hour', [ 24 ] ],
+							[ 'day', [ 7 ] ], 
+							[ 'week', [ 4 ] ], 
+							[ 'month', [ 12 ] ],
+							[ 'year', null ]
+						]
+					}
+				}]
+			});
+		});
+
+		$.getJSON('gas.php', function(data) {
+			// create the chart
+			$('#gas').highcharts('StockChart', {
+				chart: {
+					alignTicks: false
+				},
+
+				rangeSelector: {
+					selected: 0,
+						buttons: [{
+							type: 'hour',
+							count: 12,
+							text: '12h'
+						}, {
+							type: 'day',
+							count: 1,
+							text: '1d'
+						}, {
+							type: 'week',
+							count: 1,
+							text: '1w'
+						}, {
+							type: 'month',
+							count: 1,
+							text: '1m'
+						}, {
+							type: 'month',
+							count: 6,
+							text: '6m'
+						}, {
+							type: 'year',
+							count: 1,
+							text: '1y'
+						}, {
+							type: 'all',
+							text: 'All'
+						}],
+					},
+
+				title: {
+					text: 'Gas used'
+				},
+
+				credits: {
+					enabled: false
+				},
+				
+				exporting: {
+					enabled: false
+				},
+					
+				tooltip: {
+					valueDecimals: 3
+				},
+
+				series: [{
+					type: 'column',
+					name: 'm3',
+					data: data,
+					turboThreshold: 10000000,
+					dataGrouping: {
+						units: [
+							[ 'minute', [ 15, 60 ] ],
+							[ 'hour', [ 24 ] ],
+							[ 'day', [ 7 ] ], 
+							[ 'week', [ 4 ] ], 
+							[ 'month', [ 12 ] ],
+							[ 'year', null ]
+						]
+					}
+				}]
+			});
+		});
+
+
+		$.getJSON('electricity_saldo.php', function(data) {
+			// create the chart
+			$('#solar3').highcharts('StockChart', {
+				chart: {
+					alignTicks: false
+				},
+
+				rangeSelector: {
+					selected: 0,
+						buttons: [{
+							type: 'day',
+							count: 1,
+							text: '1d'
+						}, {
+							type: 'week',
+							count: 1,
+							text: '1w'
+						}, {
+							type: 'month',
+							count: 1,
+							text: '1m'
+						}, {
+							type: 'month',
+							count: 6,
+							text: '6m'
+						}, {
+							type: 'year',
+							count: 1,
+							text: '1y'
+						}, {
+							type: 'all',
+							text: 'All'
+						}],
+					},
+
+				title: {
+					text: 'Electricity saldo'
+				},
+
+				credits: {
+					enabled: false
+				},
+				
+				exporting: {
+					enabled: false
+				},
+					
+				tooltip: {
+					valueDecimals: 0
+				},
+
+				series: [{
+					type: 'column',
+					name: 'Watt',
+					data: data,
+					turboThreshold: 10000000,
+					dataGrouping: {
+						units: [
+							[ 'minute', [ 15, 60 ] ],
+							[ 'hour', [ 24 ] ],
+							[ 'day', [ 7 ] ], 
+							[ 'week', [ 4 ] ], 
+							[ 'month', [ 12 ] ],
+							[ 'year', null ]
+						]
+					}
+				}]
+			});
+		});
+	});
+</script>
+</head>
+<body style="margin: 0px; padding: 0px;">
+	<script src="js/highstock.js"></script>
+	<script src="js/modules/exporting.js"></script>
+	<div id="solar" style="position: relative; float: left; width: 50%; height: 300px"></div>
+	<div id="electricity" style="position: relative; float: left; width: 50%; height: 300px"></div>
+	<div id="solar2" style="position: relative; float: left; width: 50%; height: 300px"></div>
+	<div id="solar1" style="position: relative; float: left; width: 50%; height: 300px"></div>
+	<div id="gas" style="position: relative; float: left; width: 100%; height: 300px"></div>
+	<div id="solar3" style="position: relative; float: left; width: 100%; height: 300px"></div>
+</body>
+</html>
